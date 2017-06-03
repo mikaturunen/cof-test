@@ -1,0 +1,13 @@
+default:
+  port: 3000
+  cache_assets: true
+  merchan_id: 375917
+  secret_key: SAIPPUAKAUPPIAS
+  api_payment: https://payment.checkout.fi
+  
+
+development:
+  cache_assets: false
+
+production: &production
+  port: #{process.env.PORT}
