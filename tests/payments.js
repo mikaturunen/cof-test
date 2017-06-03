@@ -1,10 +1,7 @@
 const test = require('tape')
 const payments = require('../source/resources/payments')
-const handler = require('hmac-validator')
 const path = require('path')
 const config = require('konfig')({ path: path.join(__dirname, '..', 'source', 'config') })
-
-const hmac = handler('+', 'md5')
 
 const VERSION = '0001'
 const STAMP = new Date().getTime()
@@ -31,7 +28,7 @@ const POSTCODE = '00100'
 const POSTOFFICE = 'Helsinki'
 const EMAIL = 'keijo@couch.com'
 
-// calculate hmac to be ready
+// TODO calculate hmac to be ready
 const MAC = [
   VERSION, STAMP, AMOUNT, REFERENCE, MESSAGE, LANGUAGE, MERCHANT, RETURN, CANCEL, REJECT, DELAYED, COUNTRY, CURRENCY, DEVICE, CONTENT, TYPE, ALGORITHM, DELIVERY_DATE, FIRSTNAME, FAMILYNAME, ADDRESS, POSTCODE, POSTOFFICE, config.app.secret_key
 ]
