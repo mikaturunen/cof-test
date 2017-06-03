@@ -3,6 +3,7 @@ const payments = require('../source/resources/payments')
 const path = require('path')
 const config = require('konfig')({ path: path.join(__dirname, '..', 'source', 'config') })
 
+// I'm lazy, write all the defaults into some sort of constants for now
 const VERSION = '0001'
 const STAMP = new Date().getTime()
 const AMOUNT = 1000
@@ -37,6 +38,7 @@ const MAC = [
 
 console.log(MAC)
 
+// First test is to fetch completely empty payment wall with no POST content
 test('Validate reply from empty POST to payment wall (error case)', test => {
   test.plan(3)
   test.timeoutAfter(1500)
@@ -55,6 +57,14 @@ test('Validate reply from empty POST to payment wall (error case)', test => {
     })  
 })
 
+/**
+ * Creates a super simple payment api validator that just sends the given request object 
+ * to the payment api, attempts to create a payment and checks the reply with expected.
+ *
+ * @param {string} name  Name for the test
+ * @param {Object} request Payment api POST body payload
+ * @param {string} expected What we are expecting to receive from the payment api.
+ */
 const successPathTestCreator = (name, request, expected) => {
   test(name, test => {
     test.plan(1)
@@ -92,7 +102,7 @@ const requiredParameters = [
   { key: 'EMAIL', value: EMAIL }
 ]
 
-
+// Gets number of parameters to POST to the payment api
 const getNumberOfParameters = count => {
   let collectionOfParametersToSend = {}
   
@@ -103,6 +113,9 @@ const getNumberOfParameters = count => {
   return collectionOfParametersToSend
 }
 
+// 1. test name
+// 2. POST body to send
+// 3. what to validate from the reply. The payment wall has silly success replies so..
 successPathTestCreator(
   `Validate reply from POST to payment wall with 1 required parameter (MERCHANT)`,
   getNumberOfParameters(1),
