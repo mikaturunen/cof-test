@@ -8,12 +8,16 @@ const log = bunyan.createLogger({ name: "payments" })
 const successCodes = [ 200 ]
 const checkoutError = [ 200 ]
 
+// TODO handle all the special cases that are actually considered errors even though they are HTTP 200 OK
 const checkoutEmptyPostError = 'Yhtään tietoa ei siirtynyt POST:lla checkoutille'
 
-const validatePaymentWall = (result, response) => {
-  
-}
-
+/**
+ * Attempts to open the payment wall and create a payment at the same time.
+ *
+ * @param {Object} payload Request POST body
+ * @param {Object} headers Complete unirest headers. Defaults to empty headers.
+ * @returns {Promise} Resolves to payment wall and rejects on HTTP error or HTTP 200 OK when it's CoF specific error.
+ */
 const openPaymentWall = (payload, headers) => {
   headers = headers ? headers : {}
   
@@ -33,6 +37,7 @@ const openPaymentWall = (payload, headers) => {
         log.error(message)
         reject({ status: 502, message: message, raw: result.body })
       } else if (result.body === checkoutEmptyPostError) {
+        // TODO handle the remaining  errors the payment wall can give inside a HTTP 200 OK-
         // HTTP status was okay but something was configured incorrectly or miscommunicated
         log.error('HTTP status was okay but something was configured incorrectly or miscommunicated:', result.code)
         reject({ status: 500, message: 'Misconfiguration', raw: result.body })
