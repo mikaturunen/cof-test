@@ -10,15 +10,16 @@
     "test": "tape tests/**/*.js"
   },
   "dependencies": {
-    "body-parser": "^1.17.2",
-    "bunyan": "^1.8.10",
-    "express": "^4.15.3",
-    "konfig": "^0.2.1",
-    "pug": "^2.0.0-rc.1",
-    "ramda": "^0.24.0",
-    "unirest": "^0.5.1"
+    "body-parser": "1.17.2",
+    "bunyan": "1.8.10",
+    "express": "4.15.3",
+    "js2xmlparser": "3.0.0",
+    "konfig": "0.2.1",
+    "pug": "2.0.0-rc.1",
+    "ramda": "0.24.0",
+    "unirest": "0.5.1"
   },
   "devDependencies": {
-    "tape": "^4.6.3"
+    "tape": "4.6.3"
   }
 }
