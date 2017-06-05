@@ -2,15 +2,19 @@ const test = require('tape')
 const payments = require('../source/resources/payments')
 const path = require('path')
 const config = require('konfig')({ path: path.join(__dirname, '..', 'source', 'config') })
+const crypto = require('crypto')
+const xmlParser = require("js2xmlparser");
+
 
 // I'm lazy, write all the defaults into some sort of constants for now
+/*
 const VERSION = '0001'
 const STAMP = new Date().getTime()
 const AMOUNT = 1000
 const REFERENCE = '12344'
 const MESSAGE = ''
 const LANGUAGE = ''
-const MERCHANT = config.app.merchan_id
+const MERCHANT = config.app.merchant_id
 const RETURN = 'http://demo1.checkout.fi/xml2.php?test=1'
 const CANCEL = 'http://demo1.checkout.fi/xml2.php?test=2'
 const REJECT = ''
@@ -28,37 +32,114 @@ const ADDRESS = 'Katutie 12'
 const POSTCODE = '00100'
 const POSTOFFICE = 'Helsinki'
 const EMAIL = 'keijo@couch.com'
+const DESCRIPTION = ''
+*/
+
+const VERSION = '0001'
+const STAMP = new Date().getTime()
+const AMOUNT = 1000
+const REFERENCE = '12344'
+const MESSAGE = ''
+const LANGUAGE = ''
+const MERCHANT = config.app.merchant_id
+const RETURN = 'http://demo1.checkout.fi/xml2.php?test=1'
+const CANCEL = 'http://demo1.checkout.fi/xml2.php?test=2'
+const REJECT = ''
+const DELAYED = ''
+const COUNTRY = 'FIN'
+const CURRENCY = 'EUR'
+const DEVICE = 10
+const CONTENT = 1
+const TYPE = 0
+const ALGORITHM = 3
+const DELIVERY_DATE = '20170602'
+const FIRSTNAME = 'Keijo'
+const FAMILYNAME = 'Romanof'
+const ADDRESS = 'Katutie 12'
+const POSTCODE = '00100'
+const POSTOFFICE = 'Helsinki'
+const EMAIL = 'keijo@couch.com'
+const DESCRIPTION = ''
+
+const jsonToXml = {
+  request: {
+    '@': {
+      type: 'aggregator',
+      test: 'false'
+    },
+    aggregator: '375917',
+    version: '0002',
+    token: 'feeba684-f35a-4c98-a846-14d0b1a02024',
+    stamp: '1491913443',
+    device: 10,
+    content: 1,
+    algorithm: 3,
+    currency: 'EUR',
+    commit: false,
+    items: [{
+      description: '',
+      price: {
+        '@': {
+          currency: 'EUR',
+          vat: 24
+        },
+        '#': 2400
+      },
+      merchant: '391830'
+    }],
+    buyer: {
+      country: 'FIN',
+      language: 'FI'
+    },
+    delivery: {
+      date: 20110303
+    }
+  },
+  description: 'SiS tokenized payment test request : 11.04.2017 12:37:29'
+}
+
+const xml = new Buffer(
+    xmlParser.parse('checkout', jsonToXml)
+  )
+  .toString('base64')
+
+console.log(xml)
 
 // TODO calculate hmac to be ready
-const MAC = [
-  VERSION, STAMP, AMOUNT, REFERENCE, MESSAGE, LANGUAGE, MERCHANT, RETURN, CANCEL, REJECT, DELAYED, COUNTRY, CURRENCY, DEVICE, CONTENT, TYPE, ALGORITHM, DELIVERY_DATE, FIRSTNAME, FAMILYNAME, ADDRESS, POSTCODE, POSTOFFICE, config.app.secret_key
-]
-.join('+')
-.toUpperCase()
+const query = [
+    xml,
+    config.app.secret_key
+  ]
+  .join('+')
 
-console.log(MAC)
+const MAC = crypto.createHash('md5')
+  .update(query)
+  .digest('hex')
+  .toUpperCase()
+
+console.log(`query is: ${query} and MAC: ${MAC}.`)
 
 // First test is to fetch completely empty payment wall with no POST content
 test('Validate reply from empty POST to payment wall (error case)', test => {
   test.plan(3)
   test.timeoutAfter(1500)
-  
+
   const request = {}
   const expectedMessage = "Misconfiguration"
   const expectedOutgoingHttpStatus = 500
   const expectedIntegrationReply = 'Yhtään tietoa ei siirtynyt POST:lla checkoutille'
-  
+
   payments
     .openPaymentWall(request)
     .catch(error => {
       test.equal(error.status, expectedOutgoingHttpStatus, 'Status code is 500')
       test.equal(error.message, expectedMessage, 'Misconfigured')
       test.equal(error.raw, expectedIntegrationReply, 'Checkout reply verified')
-    })  
+    })
 })
 
 /**
- * Creates a super simple payment api validator that just sends the given request object 
+ * Creates a super simple payment api validator that just sends the given request object
  * to the payment api, attempts to create a payment and checks the reply with expected.
  *
  * @param {string} name  Name for the test
@@ -69,16 +150,16 @@ const successPathTestCreator = (name, request, expected) => {
   test(name, test => {
     test.plan(1)
     test.timeoutAfter(1500)
-    
+
     payments
       .openPaymentWall(request)
-      .then(response => test.equal(response, expected))  
+      .then(response => test.equal(response, expected))
   })
 }
 
 // this is the order they are validated in the backend based on pure blackbox tests
 // note that this order differs from the order they are defined in the document and used in hmac calculation -> https://checkoutfinland.github.io/#payment
-// for example version is first id wise and merchant seventh 
+// for example version is first id wise and merchant seventh
 const requiredParameters = [
   { key: 'MERCHANT', value: MERCHANT },
   { key: 'VERSION', value: VERSION },
@@ -105,11 +186,11 @@ const requiredParameters = [
 // Gets number of parameters to POST to the payment api
 const getNumberOfParameters = count => {
   let collectionOfParametersToSend = {}
-  
+
   for (let i=0; i<count; i++) {
     collectionOfParametersToSend[requiredParameters[i].key] = requiredParameters[i].value
   }
-  
+
   return collectionOfParametersToSend
 }
 
@@ -152,7 +233,7 @@ successPathTestCreator(
 
 successPathTestCreator(
   `Validate reply from POST to payment wall with broken amounts`,
-  { 
+  {
     MERCHANT: '375917' ,
     VERSION: '0001',
     STAMP: new Date().getTime(),
@@ -220,14 +301,16 @@ successPathTestCreator(
   getNumberOfParameters(13),
   `<p>Maksutapahtuman luonti ei onnistunut (-24).</p><p>Error in field/Virhekentässä: MAC</p><p><a href=\'http//demo1.checkout.fi/xml2.php?test=2\'>Palaa takaisin verkkokauppaan</a></p>`
 )
-successPathTestCreator(
-  `Validate reply from POST to payment wall with 14 required parameters`,
-  getNumberOfParameters(14),
-  ` `
-)
 
-successPathTestCreator(
-  `Validate reply from POST to payment wall with all required parameters`,
-  getNumberOfParameters(15),
-  ` `
-)
+
+test("Paska", test => {
+  test.plan(1)
+  test.timeoutAfter(5000)
+
+  payments
+    .openPaymentWall({
+      'CHECKOUT_XML': xml,
+      'CHECKOUT_MAC': MAC
+    })
+    .then(response => test.equal(response, "paska"))
+})
