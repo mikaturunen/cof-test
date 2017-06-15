@@ -1,35 +1,29 @@
 const path = require('path')
 const config = require('konfig')({ path: path.join(__dirname, '..', 'config') })
 const unirest = require('unirest')
-
+const xml2js = require('xml2js')
 const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'payments' })
-
-const successCodes = [ 200 ]
-const checkoutError = [ 200 ]
-
-// TODO handle all the special cases that are actually considered errors even though they are HTTP 200 OK
-const checkoutEmptyPostError = 'Yhtään tietoa ei siirtynyt POST:lla checkoutille'
+const log = bunyan.createLogger({ name: 'refunds' })
 
 /**
- * Attempts to open the payment wall and create a payment at the same time.
+ * Makes a refund against the Checkout API.
  *
  * @param {Object} payload Request POST body
  * @param {Object} headers Complete unirest headers. Defaults to empty headers.
- * @returns {Promise} Resolves to payment wall and rejects on HTTP error or HTTP 200 OK when it's CoF specific error.
+ * @returns {Promise} Resolves to refund reply. Rejects on refund error.
  */
-const openPaymentWall = (payload, headers) => {
+const refund = (payload, headers)  => {
   headers = headers ? headers : {}
 
-  log.info(`Opening payment wall.`)
+  log.info(`Calling refund.`)
 
   return new Promise((resolve, reject) => unirest
-    .post(config.app.api_payment)
+    .post(config.app.api_refund)
     .headers(headers)
     .send(payload)
     .end(result => {
-      log.info('Received reply for payment api:', result.body)
-      
+      log.info('Received reply for refund:', result.body)
+      return resolve(result.body)
       // First make sure we have handled the http error codes
       if (successCodes.indexOf(result.code) === -1) {
         // ERROR
@@ -48,5 +42,5 @@ const openPaymentWall = (payload, headers) => {
 }
 
 module.exports = {
-  openPaymentWall
+  refund: refund
 }
