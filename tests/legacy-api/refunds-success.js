@@ -39,7 +39,7 @@ const base64Xml = new Buffer(
 console.log('Base64 of the XML =>\n', base64Xml)
 
 const key = config.app.secret_key
-const mac = crypto.createHash('sha256', key)
+const mac = crypto.createHmac('sha256', key)
   .update(base64Xml)
   .digest('hex')
   .toUpperCase()

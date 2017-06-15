@@ -63,7 +63,10 @@ const query = [
   ]
   .join('+')
 
-const mac = helper.generateHmac(query, 'md5', config.app.merchant_id)
+const mac = crypto.createHash('md5')
+  .update(query)
+  .digest('hex')
+  .toUpperCase()
 
 test('Make a payment', test => {
   console.log('test raw xml:', rawXml)

@@ -37,17 +37,5 @@ module.exports = {
         .openPaymentWall(request)
         .then(response => test.equal(response, expected))
     })
-  },
-
-  /**
-   * Simple HMAC generator
-   *
-   * @param {any} query The object to generate hmac from
-   * @param {string} algorithm What algorithm to use; for example, md5.
-   * @param {string} key Shared secret key to use when generating the hash
-   */
-  generateHmac: (query, algorithm, key) => crypto.createHash(algorithm, key)
-    .update(query)
-    .digest('hex')
-    .toUpperCase()
+  }
 }
