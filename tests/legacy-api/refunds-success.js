@@ -31,11 +31,8 @@ const jsonToXml = {
 const rawXml = xmlParser.parse('checkout', jsonToXml)
 console.log("Raw xml =>\n", rawXml)
 
-const x = '<?xml version="1.0"?><checkout><identification><merchant>375917</merchant><stamp>1111112</stamp></identification><message><refund><stamp>11111112</stamp><reference>12344</reference><amount>1000</amount><receiver><email>email@osoi.te</email></receiver></refund></message></checkout>'
-
 const base64Xml = new Buffer(
-    // rawXml
-    x
+    rawXml
   )
   .toString('base64')
 
