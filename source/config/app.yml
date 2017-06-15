@@ -4,6 +4,7 @@ default:
   merchant_id: 375917
   secret_key: SAIPPUAKAUPPIAS
   api_payment: https://payment.checkout.fi
+  api_refund: https://rpcapi.checkout.fi/refund2
 
 
 development:
