@@ -32,59 +32,6 @@ const POSTOFFICE = 'Helsinki'
 const EMAIL = 'keijo@couch.com'
 const DESCRIPTION = ''
 
-const jsonToXml = {
-  request: {
-    '@': {
-      type: 'aggregator',
-      test: 'false'
-    },
-    aggregator: config.app.merchant_id,
-    version: '0002',
-    token: 'feeba684-f35a-4c98-a846-14d0b1a02024',
-    stamp: '1491913443',
-    device: 10,
-    content: 1,
-    algorithm: 3,
-    currency: 'EUR',
-    commit: false,
-    items: [{
-      description: '',
-      price: {
-        '@': {
-          currency: 'EUR',
-          vat: 24
-        },
-        '#': 2400
-      },
-      merchant: '391830'
-    }],
-    buyer: {
-      country: 'FIN',
-      language: 'FI'
-    },
-    delivery: {
-      date: 20110303
-    }
-  },
-  description: 'SiS tokenized payment test request : 11.04.2017 12:37:29'
-}
-
-const xml = new Buffer(
-    xmlParser.parse('checkout', jsonToXml)
-  )
-  .toString('base64')
-
-const query = [
-    xml,
-    config.app.secret_key
-  ]
-  .join('+')
-
-const MAC = crypto.createHash('md5', config.app.secret_key)
-  .update(query)
-  .digest('hex')
-  .toUpperCase()
-
 const requiredParameters = [
   { key: 'VERSION', value: VERSION },
   { key: 'STAMP', value: STAMP },
@@ -120,7 +67,10 @@ let parameters = helper.getNumberOfParameters(requiredParameters, 24)
 let values = Object.keys(parameters).map(key => parameters[key]).join('+')
 let properties = Object.keys(parameters).map(key => key).join('+')
 
-const calculatedMac = helper.generateHmac(values, 'md5', config.app.secret_key)
+const calculatedMac = crypto.createHash('md5')
+  .update(values)
+  .digest('hex')
+  .toUpperCase()
 
 parameters.MAC = calculatedMac
 
