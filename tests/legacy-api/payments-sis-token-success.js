@@ -8,8 +8,6 @@ const helper = require('./helper')
 
 const items = {
   item: {
-    code: '123',
-    stamp: '1234444444',
     description: '',
     price: {
       '@': {
@@ -18,8 +16,7 @@ const items = {
       },
       '#': 2400
     },
-    merchant: '391830',
-    reference: '11113333'
+    merchant: '391830'
   },
   amount: 2400
 }
@@ -32,12 +29,10 @@ const jsonToXml = {
     },
     aggregator: config.app.merchant_id,
     version: '0002',
+    token: '02343287-1e1a-4b92-8008-367e6ce35221',
     stamp: '1491913443',
-    reference: '12344',
-    description: 'Hi, my name is description',
     device: 10,
     content: 1,
-    type: 0,
     algorithm: 3,
     currency: 'EUR',
     commit: false,
@@ -45,45 +40,14 @@ const jsonToXml = {
       items
     ],
     buyer: {
-      '@': {
-        vatid: ''
-      },
       country: 'FIN',
-      language: 'FI',
-      firstname: '',
-      familyname: '',
-      address: '',
-      postalcode: '',
-      postaloffice: '',
-      email: '',
-      gsm: ''
+      language: 'FI'
     },
     delivery: {
-      company: {
-        '@': {
-          vatid: ''
-        }
-      },
-      firstname: '',
-      familyname: '',
-      address: '',
-      postalcode: '',
-      postaloffice: '',
-      country: '',
-      email: '',
-      gsm: '',
-      language: '',
-      date: 20171212
-    },
-    control: {
-      '@': {
-        type: 'default'
-      },
-      return: 'http://localhost:8080/thankyou',
-      reject: 'http://localhost:8080/thankyou',
-      cancel: 'http://localhost:8080/thankyou'
+      date: 20110303
     }
-  }
+  },
+  description: 'SiS tokenized payment test request : 11.04.2017 12:37:29'
 }
 
 const rawXml = xmlParser.parse('checkout', jsonToXml)
