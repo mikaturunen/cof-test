@@ -2,55 +2,43 @@ const test = require('tape')
 const payments = require('../../source/resources/payments')
 const path = require('path')
 const config = require('konfig')({ path: path.join(__dirname, '..', '..', 'source', 'config') })
-const xmlParser = require('js2xmlparser')
 const crypto = require('crypto')
 const helper = require('./helper')
 
-const items = {
-  item: {
-    description: '',
-    price: {
-      '@': {
-        currency: 'EUR',
-        vat: 24
-      },
-      '#': 2400
-    },
-    merchant: '391830'
-  },
-  amount: 2400
-}
-
-const jsonToXml = {
-  request: {
-    '@': {
-      type: 'aggregator',
-      test: 'false'
-    },
-    aggregator: config.app.merchant_id,
-    version: '0002',
-    token: '02343287-1e1a-4b92-8008-367e6ce35221',
-    stamp: '1491913443',
-    device: 10,
-    content: 1,
-    algorithm: 3,
-    currency: 'EUR',
-    commit: false,
-    items: [
-      items
-    ],
-    buyer: {
-      country: 'FIN',
-      language: 'FI'
-    },
-    delivery: {
-      date: 20110303
-    }
-  },
-  description: 'SiS tokenized payment test request : 11.04.2017 12:37:29'
-}
-
-const rawXml = xmlParser.parse('checkout', jsonToXml)
+const rawXml = `<?xml version="1.0"?>
+  <checkout xmlns="http://checkout.fi/request">
+      <request type="aggregator" test="false">
+          <aggregator>375917</aggregator>
+          <token>02343287-1e1a-4b92-8008-367e6ce35221</token>
+          <version>0002</version>
+          <stamp>123456789</stamp>
+          <reference>123456</reference>
+          <device>10</device>
+          <content>1</content>
+          <type>0</type>
+          <algorithm>3</algorithm>
+          <currency>EUR</currency>
+          <commit>false</commit>
+          <description>SiS tokenized payment test request</description>
+          <items>
+              <item>
+                  <code/>
+                  <description>sub trade</description>
+                  <price currency="EUR" vat="23">2500</price>
+                  <merchant>391830</merchant>
+                  <control/>
+              </item>
+              <amount currency="EUR">2500</amount>
+          </items>
+          <buyer>
+              <country>FIN</country>
+              <language>FI</language>
+          </buyer>
+          <delivery>
+              <date>20170619</date>
+          </delivery>
+      </request>
+  </checkout>`
 
 const xml = new Buffer(
     rawXml
@@ -80,5 +68,5 @@ test('Make a payment', test => {
       'CHECKOUT_XML': xml,
       'CHECKOUT_MAC': mac
     })
-    .then(response => test.equal(response.indexOf('</trade>') != -1, true))
+    .then(response => test.equal(response.indexOf('<statusCode>201</statusCode>') != -1, true))
 })
