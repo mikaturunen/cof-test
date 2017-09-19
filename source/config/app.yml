@@ -7,7 +7,10 @@ default:
     url: https://payment.checkout.fi
     strictSSL: true
   api_refund:
-    url: https://rpcapi.checkout.dev/refund2
+    url: https://rpcapi.checkout.fi/refund2
+    strictSSL: true
+  api_status:
+    url: https://rpcapi.checkout.fi/poll
     strictSSL: true
 
 development:
