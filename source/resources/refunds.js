@@ -18,7 +18,8 @@ const refund = (payload, headers)  => {
   log.info(`Calling refund.`)
 
   return new Promise((resolve, reject) => unirest
-    .post(config.app.api_refund)
+    .post(config.app.api_refund.url)
+    .strictSSL(config.app.api_refund.strictSSL)
     .headers(headers)
     .send(payload)
     .end(result => {
