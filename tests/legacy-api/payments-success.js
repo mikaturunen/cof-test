@@ -63,21 +63,25 @@ const requiredParameters = [
   { key: 'SECRET_KEY', value: config.app.secret_key }
 ]
 
-let parameters = helper.getNumberOfParameters(requiredParameters, 24)
-let values = Object.keys(parameters).map(key => parameters[key]).join('+')
-let properties = Object.keys(parameters).map(key => key).join('+')
+const calculateMac = (algorithm, payload) =>
+  crypto.createHash(algorithm)
+    .update(payload)
+    .digest('hex')
+    .toUpperCase()
 
-const calculatedMac = crypto.createHash('md5')
-  .update(values)
-  .digest('hex')
-  .toUpperCase()
+const paymentTest = (test, algorithm) => {
+  let parameters = helper.getNumberOfParameters(requiredParameters, 24)
+  const properties = Object.keys(parameters).map(key => key).join('+')
 
-parameters.MAC = calculatedMac
+  // STAMP must be unique, otherwise same, already created trade is always returned
+  parameters.STAMP = (new Date()).getTime()
 
-test('Make a payment', test => {
+  const values = Object.keys(parameters).map(key => parameters[key]).join('+')
+  parameters.MAC = calculateMac(algorithm, values)
+
   console.log('properties', properties)
   console.log('values:', values)
-  console.log('hmac:', calculatedMac)
+  console.log('hmac:', parameters.MAC)
 
   test.plan(1)
   test.timeoutAfter(1500)
@@ -87,4 +91,12 @@ test('Make a payment', test => {
   payments
     .openPaymentWall(parameters)
     .then(response => test.equal(response.indexOf('</trade>') != -1, true))
+}
+
+test('Make a payment (MD5)', test => {
+  paymentTest(test, 'md5')
+})
+
+test('Make a payment (SHA-256)', test => {
+  paymentTest(test, 'sha256')
 })
