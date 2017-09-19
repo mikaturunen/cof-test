@@ -74,7 +74,7 @@ const paymentTest = (algorithm) => (test) => {
   const properties = Object.keys(parameters).map(key => key).join('+')
 
   // STAMP must be unique, otherwise same, already created trade is always returned
-  parameters.STAMP = (new Date()).getTime()
+  parameters.STAMP = new Date().getTime()
 
   const values = Object.keys(parameters).map(key => parameters[key]).join('+')
   parameters.MAC = calculateMac(algorithm, values)
