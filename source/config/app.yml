@@ -3,9 +3,15 @@ default:
   cache_assets: true
   merchant_id: 375917
   secret_key: SAIPPUAKAUPPIAS
-  api_payment: https://payment.checkout.fi
-  api_refund: https://rpcapi.checkout.fi/refund2
-
+  api_payment:
+    url: https://payment.checkout.fi
+    strictSSL: true
+  api_refund:
+    url: https://rpcapi.checkout.fi/refund2
+    strictSSL: true
+  api_status:
+    url: https://rpcapi.checkout.fi/poll
+    strictSSL: true
 
 development:
   cache_assets: false
