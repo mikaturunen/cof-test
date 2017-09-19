@@ -69,7 +69,7 @@ const calculateMac = (algorithm, payload) =>
     .digest('hex')
     .toUpperCase()
 
-const paymentTest = (test, algorithm) => {
+const paymentTest = (algorithm) => (test) => {
   let parameters = helper.getNumberOfParameters(requiredParameters, 24)
   const properties = Object.keys(parameters).map(key => key).join('+')
 
@@ -93,10 +93,6 @@ const paymentTest = (test, algorithm) => {
     .then(response => test.equal(response.indexOf('</trade>') != -1, true))
 }
 
-test('Make a payment (MD5)', test => {
-  paymentTest(test, 'md5')
-})
+test('Make a payment (MD5)', paymentTest('md5'))
 
-test('Make a payment (SHA-256)', test => {
-  paymentTest(test, 'sha256')
-})
+test('Make a payment (MD5)', paymentTest('sha256'))
