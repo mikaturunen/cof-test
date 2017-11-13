@@ -63,8 +63,8 @@ const requiredParameters = [
   { key: 'SECRET_KEY', value: config.app.secret_key }
 ]
 
-const calculateMac = (algorithm, payload) =>
-  crypto.createHash(algorithm)
+const calculateMac = (algorithm, payload, secret) =>
+  (algorithm === 'sha256-hmac' ? crypto.createHmac('sha256', secret) : crypto.createHash(algorithm))
     .update(payload)
     .digest('hex')
     .toUpperCase()
@@ -75,9 +75,13 @@ const paymentTest = (algorithm) => (test) => {
 
   // STAMP must be unique, otherwise same, already created trade is always returned
   parameters.STAMP = new Date().getTime()
+  // With HMAC the secret is not included in the payload
+  if (algorithm === 'sha256-hmac') {
+    delete parameters.SECRET_KEY;
+  }
 
   const values = Object.keys(parameters).map(key => parameters[key]).join('+')
-  parameters.MAC = calculateMac(algorithm, values)
+  parameters.MAC = calculateMac(algorithm, values, config.app.secret_key)
 
   console.log('properties', properties)
   console.log('values:', values)
@@ -95,4 +99,6 @@ const paymentTest = (algorithm) => (test) => {
 
 test('Make a payment (MD5)', paymentTest('md5'))
 
-test('Make a payment (MD5)', paymentTest('sha256'))
+test('Make a payment (SHA256)', paymentTest('sha256'))
+
+test('Make a payment (SHA256-HMAC)', paymentTest('sha256-hmac'))

@@ -14,8 +14,8 @@ const payment = {
   MESSAGE:       '',
   LANGUAGE:      'FI',
   MERCHANT:      config.app.merchant_id,
-  RETURN:        'http://demo1.checkoyut.fi/',
-  CANCEL:        'http://demo1.checkoyut.fi/',
+  RETURN:        'http://demo1.checkout.fi/',
+  CANCEL:        'http://demo1.checkout.fi/',
   REJECT:        '',
   DELAYED:       '',
   COUNTRY:       'FIN',
@@ -29,24 +29,24 @@ const payment = {
   FAMILYNAME:    'Romanof',
   ADDRESS:       'Katutie 12',
   POSTCODE:      '00100',
-  POSTOFFICE:    'Helsinki',
-  SECRET_KEY:    config.app.secret_key
+  POSTOFFICE:    'Helsinki'
 }
 
 const statusAlgorihm = {
   'md5': 1,
-  'sha256': 3
+  'sha256': 3,
+  'sha256-hmac': 4
 }
 
 const hashPayload = Object.keys(payment).map((key) => payment[key]).join('+')
 
-const calculateMac = (algorithm, payload) =>
-  crypto.createHash(algorithm)
+const calculateMac = (algorithm, payload, secret) =>
+  (algorithm === 'sha256-hmac' ? crypto.createHmac('sha256', secret) : crypto.createHash(algorithm))
     .update(payload)
     .digest('hex')
     .toUpperCase()
 
-payment.MAC = calculateMac('sha256', hashPayload)
+payment.MAC = calculateMac('sha256-hmac', hashPayload, config.app.secret_key)
 
 const statusTest = (algorithm) => (test) => {
   test.plan(2)
@@ -70,9 +70,13 @@ const statusTest = (algorithm) => (test) => {
         SECRET_KEY: config.app.secret_key
       }
 
+      if (algorithm === 'sha256-hmac') {
+        delete statusQuery.SECRET_KEY;
+      }
+
       const statusHashPayload = Object.keys(statusQuery).map((key) => statusQuery[key]).join('+')
 
-      statusQuery.MAC = calculateMac(algorithm, statusHashPayload);
+      statusQuery.MAC = calculateMac(algorithm, statusHashPayload, config.app.secret_key);
 
       status
         .queryStatus(statusQuery)
@@ -85,4 +89,6 @@ const statusTest = (algorithm) => (test) => {
 
 test('Status query (MD5)', statusTest('md5'))
 
-test('Status query (SHA-256)', statusTest('sha256'))
+test('Status query (SHA256)', statusTest('sha256'))
+
+test('Status query (SHA256-HMAC)', statusTest('sha256-hmac'))
