@@ -104,16 +104,16 @@ const getHashPayload = (base64xml) => [
 ]
 .join('+')
 
-const calculateMac = (algorithm, payload) =>
-  crypto.createHash(algorithm)
-    .update(getHashPayload(payload))
+const calculateMac = (algorithm, payload, secret) =>
+  (algorithm === 'sha256-hmac' ? crypto.createHmac('sha256', secret) : crypto.createHash(algorithm))
+    .update(payload)
     .digest('hex')
     .toUpperCase()
 
 const createSiSPayment = (algorithm) => {
   const rawXml = getRawXml(new Date().getTime())
   const payload = new Buffer(rawXml).toString('base64')
-  const mac = calculateMac(algorithm, payload)
+  const mac = calculateMac(algorithm, getHashPayload(payload), config.app.secret_key)
 
   console.log('test raw xml:', rawXml)
 
@@ -133,7 +133,25 @@ const sisTest = (algorithm) => (test) => {
 
 test('Make a SiS payment (MD5)', sisTest('md5'))
 
-test('Make a SiS payment (SHA-256)', sisTest('sha256'))
+test('Make a SiS payment (SHA256)', sisTest('sha256'))
+
+test('Make a SiS payment (SHA256-HMAC)', (test) => {
+  test.plan(1)
+  test.timeoutAfter(1500)
+
+  const rawXml = getRawXml(new Date().getTime())
+  const payload = new Buffer(rawXml).toString('base64')
+  const mac = calculateMac('sha256-hmac', payload, config.app.secret_key)
+
+  console.log('test raw xml:', rawXml)
+
+  // Notice how loosely the return is handled. Assuming it's okay when we see the <trade> closing tag.
+  payments
+    .openPaymentWall({
+      'CHECKOUT_XML': payload,
+      'CHECKOUT_MAC': mac
+    }).then(response => test.equal(response.indexOf('</trade>') != -1, true))
+})
 
 test('Verify payment URL (hosted SiS payment wall)', (test) => {
   test.plan(4)
