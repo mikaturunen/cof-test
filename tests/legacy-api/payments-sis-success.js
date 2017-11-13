@@ -167,7 +167,7 @@ test('Verify payment URL (hosted SiS payment wall)', (test) => {
         .strictSSL(config.app.api_payment.strictSSL)
         .end((result) => {
           test.equal(result.status, 200, 'Payment URL open HTTP status')
-          test.ok(result.body.indexOf('merchant_business_id') > -1, 'Payment URL HTML contains business ID')
+          test.ok(result.body.indexOf('orderWindow') > -1, 'Payment URL HTML contains business ID')
         })
     })
 })
