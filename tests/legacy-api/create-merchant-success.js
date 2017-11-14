@@ -2,8 +2,8 @@ const USERNAME = 'RESELLER_USERNAME'
 const PASSWORD = 'RESELLER_PASSWORD'
 const URL = 'RESELLER_URL'
 if (process.env[USERNAME] === undefined || process.env[PASSWORD] === undefined || process.env[URL] === undefined) {
-    console.log(`No ${USERNAME} and ${PASSWORD} environment variables provided for the Reseller API.`)
-    console.log('Skipping reseller/createMerchant test.')
+    console.log('Missing one or more env variables: ', [USERNAME, PASSWORD, URL])
+    console.log('Skipping reseller create merchant test.')
     process.exit(0)
 }
 
