@@ -57,8 +57,8 @@ test('Make a refund', test => {
   test.plan(1)
   test.timeoutAfter(3500)
 
-  // Notice how loosely the return is handled. Assuming it's okay when we see the <trade> closing tag.
+  // Notice how loosely the return is handled. Assuming it's okay when we see the <statusMessage> closing tag.
   refunds
     .refund(body)
-    .then(response => test.equal(response.indexOf('</trade>') != -1, true))
+    .then(response => test.equal(response.indexOf('</statusMessage>') != -1, true))
 })
