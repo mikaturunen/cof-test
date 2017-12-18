@@ -3,8 +3,8 @@ const PASSWORD = 'RESELLER_PASSWORD'
 const URL = 'RESELLER_URL'
 if (process.env[USERNAME] === undefined || process.env[PASSWORD] === undefined || process.env[URL] === undefined) {
     console.log('Missing one or more env variables: ', [USERNAME, PASSWORD, URL])
-    console.log('Skipping reseller create merchant test.')
-    process.exit(0)
+    console.log('Skipping reseller create merchant test. Do not worry, this is completely okay.')
+    return
 }
 
 const test = require('tape')
