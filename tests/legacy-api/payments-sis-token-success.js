@@ -68,7 +68,14 @@ test('Make a token payment (MD5)', test => {
       'CHECKOUT_XML': xml,
       'CHECKOUT_MAC': mac
     })
-    .then(response => test.equal(response.indexOf('<statusCode>201</statusCode>') != -1, true))
+    // There are two cases that we consider a success for this now
+    // 1. we managed to make auth hold
+    // 2. or we got a response that someone already made the auth hold with this stamp
+    .then(response => test.equal(
+      response.indexOf('<statusCode>201</statusCode>') != -1 ||
+      response.indexOf('<statusCode>409</statusCode>') != -1, 
+      true
+    ))
 })
 
 test('Make a token payment (SHA256-HMAC)', test => {
@@ -88,5 +95,12 @@ test('Make a token payment (SHA256-HMAC)', test => {
       'CHECKOUT_XML': xml,
       'CHECKOUT_MAC': mac
     })
-    .then(response => test.equal(response.indexOf('<statusCode>201</statusCode>') != -1, true))
+    // There are two cases that we consider a success for this now
+    // 1. we managed to make auth hold
+    // 2. or we got a response that someone already made the auth hold with this stamp
+    .then(response => test.equal(
+      response.indexOf('<statusCode>201</statusCode>') != -1 ||
+      response.indexOf('<statusCode>409</statusCode>') != -1, 
+      true
+    ))
 })
